@@ -1,34 +1,27 @@
 # node 16.20.2 mongodb 7
 # cai dat mongo
 # cai dat mongosh
-# tao tai khoan
-	mongosh
-	use data
-	db.createUser({
-	  user: "name_data",
-	  pwd: "pass_data",
-	  roles: [
-	    { role: "readWrite", db: "data" },
-	    { role: "dbAdmin", db: "data" }
-	  ]
-	})
-# tao table check
-	db.em_places.insertOne({
-	  factory_id: "1",
-	  name: "demo",
-	  folder: "demo",
-	  type_id: "1",
-	  standard_id: "1",
-	  lat: null,
-	  lng: null,
-	  timeout: "10",
-	  timeout_unit: "m",
-	  alert: [],
-	  alert_merge: [],
-	  place_id: 13,
-	  updated_at: ISODate("2025-07-08T12:58:27.326Z"),
-	  created_at: ISODate("2025-07-08T12:58:27.326Z")
-	})
+
+
+🔄 Khởi động lại MongoDB service:
+net stop MongoDB
+net start MongoDB
+
+# tat xac thuc
+#security:
+  #authorization: enabled
+# tao tai khoan admin 
+
+use admin
+db.createUser({
+  user: "name_data",
+  pwd: "pass_data",
+  roles: [
+    { role: "userAdminAnyDatabase", db: "admin" },
+    { role: "readWriteAnyDatabase", db: "admin" }
+  ]
+})
+
 # bat xac thuc
 	sudo nano /etc/mongod.conf
 # win
@@ -46,7 +39,23 @@
 	net stop MongoDB
 	net start MongoDB
 # check
-	mongosh "mongodb://name_data:pass_data@127.0.0.1:27017/data"
+	mongosh "mongodb://name_data:pass_data@127.0.0.1:27017/admin"
+
+# ket noi voi mongo bang tai khoan admin 
+mongosh "mongodb://name_data:pass_data@127.0.0.1:27017/admin"
+
+use saigonvrg
+db.createUser({
+  user: "my_user",
+  pwd: "my_password",
+  roles: [ { role: "readWrite", db: "saigonvrg" } ]
+})
+
+# .env dung tai khoan nay
+
+SYNC_LOG_MONGODB=mongodb://my_user:my_password@127.0.0.1:27017/saigonvrg
+
+
 # tao .env
 	NODE_ENV=production
 	SYNC_LOG_MONGODB=mongodb://name_data:pass_data@127.0.0.1:27017/data
