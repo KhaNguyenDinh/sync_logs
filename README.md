@@ -1,3 +1,4 @@
+# node 16.20.2 mongodb 7
 # cai dat mongo
 # cai dat mongosh
 # tao tai khoan
