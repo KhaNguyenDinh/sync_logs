@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const fs = require('node:fs');
+// const fs = require('node:fs');
+const fs = require('fs');
 const path = require('path');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -12,7 +13,7 @@ dayjs.extend(timezone);
 
 // Suppress console.log in production
 // if (process.env.NODE_ENV === 'production') {
-//     console.log = () => {};
+//    console.log = () => {};
 // }
 
 // MongoDB schemas
@@ -73,13 +74,20 @@ async function connectToMongoDB() {
     }
 
     try {
+        // Cấu hình tránh cảnh báo deprecated
+        mongoose.set('useCreateIndex', true); // Dành cho ensureIndex
+        mongoose.set('useFindAndModify', false); // Nếu bạn có dùng findOneAndUpdate, v.v.
+
         await mongoose.connect(process.env.SYNC_LOG_MONGODB, {
-            serverSelectionTimeoutMS: 5000, // Thời gian chờ chọn server
-            heartbeatFrequencyMS: 10000, // Kiểm tra trạng thái kết nối mỗi 10s
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 20 * 1000,       // Thời gian chờ chọn server
+            heartbeatFrequencyMS: 60* 1000           // Kiểm tra kết nối mỗi 1 phut
         });
-        console.log("Connected to MongoDB");
+
+        console.log("✅ Connected to MongoDB");
     } catch (error) {
-        console.error("MongoDB connection error:", error);
+        console.error("❌ MongoDB connection error:", error);
         process.exit(1);
     }
 }
@@ -234,7 +242,9 @@ async function insertLogEntry(place, entry) {
 
         try {
             const res = await (new Log(item)).save();
-            console.log('✅ insert', place.id, res?._id);
+            // console.log('✅ insert', place.id, res?._id);
+            console.log('✅ insert', place.id, res && res._id);
+
         } catch (err) {
             console.error('❌ Insert error:', err);
         }
@@ -342,7 +352,7 @@ async function fetchListPlace() {
 // Fetch places from MySQL periodically
 setInterval(async () => {
     await fetchListPlace()
-}, 15000);
+}, 30000);
 
 // Main processing function
 async function main() {
@@ -378,7 +388,7 @@ async function main() {
     // Continue checking for new files
     setTimeout(() => {
         main();
-    }, 200);
+    }, 5000);
 }
 
 fetchListPlace().then(() => {
